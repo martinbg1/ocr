@@ -7,17 +7,16 @@ from skimage.feature import hog
 import skimage.io as skm
 
 
-def load_data():
+def load_data(root="dataset/chars74k-lite"):
     imgs, labels = list(), list()
-    root = "dataset/chars74k-lite"
     for root, dirs, files in os.walk(root, topdown=False):
         for f in files:
             if "LICENSE" not in f:
                 # read image with shape(20, 20)
                 img = skm.imread(os.path.join(root, f))
                 # run image through Histogram of Oriented Gradients
-                # shape (324, )
-                hog_img = hog(img, pixels_per_cell=(5, 5),
+                # shape (576, )
+                hog_img = hog(img, pixels_per_cell=(4, 4),
                               cells_per_block=(2, 2))
                 imgs.append(hog_img)
                 # add image label
@@ -29,7 +28,7 @@ def load_data():
 def feature_scaling(X, y):
     scaler = StandardScaler()
     X_s = scaler.fit_transform(X, y)
-    print("Featured scaled...")
+    print("Features scaled...")
     return X_s
 
 
