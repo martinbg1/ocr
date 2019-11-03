@@ -37,7 +37,7 @@ def calculate_error(y_pred, y_test):
         print("{}: {}".format(chr(k + 97),  v[1] / v[0]))
 
 
-def clf_knn():
+def clf_knn(X_train, X_test, y_train):
     '''
     knn classifier
     '''
@@ -49,7 +49,7 @@ def clf_knn():
     return y_pred_knn
 
 
-def clf_svm():
+def clf_svm(X_train, X_test, y_train):
     '''
     svm classifier
     '''
@@ -61,12 +61,11 @@ def clf_svm():
     return y_pred_svm
 
 
-def clf_ann():
+def clf_ann(X_train, X_test, y_train):
     '''
     multi-layer perceptron classifier
     '''
-    clf_ann = MLPClassifier(solver='adam', max_iter=1000,
-                            hidden_layer_sizes=(100))
+    clf_ann = MLPClassifier(solver='adam', max_iter=1000)
     clf_ann.fit(X_train, y_train)
     y_pred_ann = clf_ann.predict(X_test)
     print("Predicted correctly using ann: {}"
@@ -78,13 +77,13 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = init_data()
 
     # run knn
-    # y_pred = clf_knn()
+    # y_pred = clf_knn(X_train, X_test, y_train)
 
     # run svm
-    y_pred = clf_svm()
+    y_pred = clf_svm(X_train, X_test, y_train)
 
     # run ann
-    # y_pred = clf_ann()
+    # y_pred = clf_ann(X_train, X_test, y_train)
 
     # plot error
     print("\nError:")
