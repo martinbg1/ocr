@@ -18,11 +18,22 @@ def load_data(root="dataset/chars74k-lite"):
                 # shape (576, )
                 hog_img = hog(img, pixels_per_cell=(4, 4),
                               cells_per_block=(2, 2))
+                # print(hog_img.shape)
                 imgs.append(hog_img)
                 # add image label
-                labels.append(root[-1])
+                labels.append(ord(root[-1]) - 97)
     print("Loaded data successfully...")
     return np.array(imgs), np.array(labels)
+
+
+def load_data_detector(root="dataset/detection-images"):
+    imgs = list()
+    for root, dirs, files in os.walk(root, topdown=False):
+        for f in files:
+            img = skm.imread(os.path.join(root, f))
+            imgs.append(img)
+    print("loaded detector images successfully")
+    return np.array(imgs)
 
 
 def feature_scaling(X, y):
@@ -52,10 +63,13 @@ def init_data():
     # X = feature_selection(X_init, y, 70)
     X = feature_scaling(X_init, y)
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=1)
+        X, y, test_size=0.2, random_state=None)
     print("data split...")
     return X_train, X_test, y_train, y_test
 
 
 if __name__ == "__main__":
     init_data()
+    # X = load_data_detector()
+    # print(X[0].shape)
+    # print(X[1].shape)

@@ -18,15 +18,15 @@ def evaluate(y_true, y_pred):
 
 def calculate_error(y_pred, y_test):
     # convert from char to int. a=0, b=1 etc.
-    y_pred_int = [ord(char) - 97 for char in y_pred]
-    y_test_int = [ord(char) - 97 for char in y_test]
+    # y_pred_int = [ord(char) - 97 for char in y_pred]
+    # y_test_int = [ord(char) - 97 for char in y_test]
 
     # some spaghetti à la capri to find accuarcy for each character
     predictions = {}
     for i in range(26):
         predictions[i] = (0, 0)
 
-    for pred, y in zip(y_pred_int, y_test_int):
+    for pred, y in zip(y_pred, y_test):
         if pred == y:
             predictions[y] = (
                 predictions[y][0] + 1, predictions[y][1] + 1)
@@ -49,6 +49,25 @@ def clf_knn(X_train, X_test, y_train):
     return y_pred_knn
 
 
+def clf_keras(X_train, X_test, y_train, y_test):
+    import keras
+    from keras.models import Sequential
+    from keras.layers import Dense
+
+    model = Sequential()
+    model.add(Dense(128, activation='relu', input_shape=(576,)))
+    model.add(Dense(26, activation='softmax'))
+
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer='adam', metrics=['accuracy'])
+
+    history = model.fit(X_train, y_train, epochs=15, batch_size=64)
+    test_loss, test_acc = model.evaluate(X_test, y_test)
+
+    print(test_loss)
+    print(test_acc)
+
+
 def clf_svm(X_train, X_test, y_train):
     '''
     svm classifier
@@ -61,18 +80,6 @@ def clf_svm(X_train, X_test, y_train):
     return y_pred_svm
 
 
-def clf_ann(X_train, X_test, y_train):
-    '''
-    multi-layer perceptron classifier
-    '''
-    clf_ann = MLPClassifier(solver='adam', max_iter=1000)
-    clf_ann.fit(X_train, y_train)
-    y_pred_ann = clf_ann.predict(X_test)
-    print("Predicted correctly using ann: {}"
-          .format(evaluate(y_test, y_pred_ann)))
-    return y_pred_ann
-
-
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = init_data()
 
@@ -80,11 +87,15 @@ if __name__ == "__main__":
     # y_pred = clf_knn(X_train, X_test, y_train)
 
     # run svm
-    y_pred = clf_svm(X_train, X_test, y_train)
+    # y_pred = clf_svm(X_train, X_test, y_train)
 
     # run ann
     # y_pred = clf_ann(X_train, X_test, y_train)
 
+    # run keras
+    clf_keras(X_train, X_test, y_train, y_test)
+
     # plot error
-    print("\nError:")
-    err = calculate_error(y_pred, y_test)
+    # print("\nError:")
+    # err = calculate_error(y_pred, y_test)
+    # clf_keras(X_train, X_test, y_train)
