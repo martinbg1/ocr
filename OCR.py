@@ -61,11 +61,8 @@ def clf_keras(X_train, X_test, y_train, y_test):
     model.compile(loss='sparse_categorical_crossentropy',
                   optimizer='adam', metrics=['accuracy'])
 
-    history = model.fit(X_train, y_train, epochs=15, batch_size=64)
-    test_loss, test_acc = model.evaluate(X_test, y_test)
-
-    print(test_loss)
-    print(test_acc)
+    history = model.fit(X_train, y_train, epochs=35, batch_size=64)
+    # test_loss, test_acc = model.evaluate(X_test, y_test)
 
 
 def clf_svm(X_train, X_test, y_train):
@@ -80,6 +77,19 @@ def clf_svm(X_train, X_test, y_train):
     return y_pred_svm
 
 
+def init_clf():
+    X_train, X_test, y_train, y_test = init_data()
+    clf_svm = svm.SVC(gamma='scale')
+    clf_svm.fit(X_train, y_train)
+    print("training done...")
+    return clf_svm
+
+
+def clf_predict(X, clf):
+    y_pred = clf.predict(X)
+    return y_pred
+
+
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = init_data()
 
@@ -87,13 +97,13 @@ if __name__ == "__main__":
     # y_pred = clf_knn(X_train, X_test, y_train)
 
     # run svm
-    # y_pred = clf_svm(X_train, X_test, y_train)
+    y_pred = clf_svm(X_train, X_test, y_train)
 
     # run ann
     # y_pred = clf_ann(X_train, X_test, y_train)
 
     # run keras
-    clf_keras(X_train, X_test, y_train, y_test)
+    # clf_keras(X_train, X_test, y_train, y_test)
 
     # plot error
     # print("\nError:")

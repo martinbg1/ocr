@@ -38,7 +38,7 @@ def load_data_detector(root="dataset/detection-images"):
 
 def feature_scaling(X, y):
     scaler = StandardScaler()
-    X_s = scaler.fit_transform(X, y)
+    X_s = scaler.fit_transform(X)
     print("Features scaled...")
     return X_s
 
@@ -60,8 +60,8 @@ def feature_selection(X, y, p=0):
 
 def init_data():
     X_init, y = load_data()
-    # X = feature_selection(X_init, y, 70)
     X = feature_scaling(X_init, y)
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=None)
     print("data split...")
