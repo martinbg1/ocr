@@ -1,75 +1,69 @@
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.feature_selection import SelectKBest, SelectPercentile, chi2
-from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
 import skimage.io as skm
 
 
-def load_data(root="dataset/chars74k-lite"):
-    imgs, labels = list(), list()
-    for root, dirs, files in os.walk(root, topdown=False):
+def load_data(path="dataset/chars74k-lite"):
+    images, labels = list(), list()
+    for root, dirs, files in os.walk(path, topdown=False):
         for f in files:
             if "LICENSE" not in f:
-                # read image with shape(20, 20)
-                img = skm.imread(os.path.join(root, f))
-                # run image through Histogram of Oriented Gradients
-                # shape (576, )
-                hog_img = hog(img, pixels_per_cell=(4, 4),
-                              cells_per_block=(2, 2))
-                # print(hog_img.shape)
-                imgs.append(hog_img)
-                # add image label
+                image = skm.imread(os.path.join(root, f))
+                images.append(image)
                 labels.append(ord(root[-1]) - 97)
-    print("Loaded data successfully...")
-    return np.array(imgs), np.array(labels)
+    print("Loaded classification data successfully...")
+    return np.array(images), np.array(labels)
 
 
-def load_data_detector(root="dataset/detection-images"):
-    imgs = list()
-    for root, dirs, files in os.walk(root, topdown=False):
-        for f in files:
-            img = skm.imread(os.path.join(root, f))
-            imgs.append(img)
-    print("loaded detector images successfully")
-    return np.array(imgs)
+def _apply_normalization(X):
+    X_n = []
+    for image in X:
+        image = (image - np.min(image)) / (np.ptp(image) + 1e-6)
+        X_n.append(image)
+    return np.array(X_n)
 
 
-def feature_scaling(X, y):
-    scaler = StandardScaler()
-    X_s = scaler.fit_transform(X)
-    print("Features scaled...")
-    return X_s
+def _apply_hog(X):
+    X_h = []
+    for image in X:
+        hog_image = hog(image, pixels_per_cell=(4, 4), cells_per_block=(2, 2))
+        X_h.append(hog_image)
+    return np.array(X_h)
 
 
-# currently not used
-def feature_selection(X, y, p=0):
-    # alternative 1
-    # feature selection based on k best features
-    if p == 0:
-        X_f = SelectKBest(chi2, k=200).fit_transform(X, y)
-    # alternative 2
-    # select features according to a percentile of the highest scores
-    else:
-        X_f = SelectPercentile(chi2, percentile=p).fit_transform(X, y)
-    print("feature selection...")
+def _apply_augmentation(X, Y):
+    X_a = X.copy()
+    Y_a = Y.copy()
+    # Counter-clockwise
+    X_a = np.concatenate((X_a, np.rot90(X, axes=(1, 2))), axis=0)
+    Y_a = np.concatenate((Y_a, Y), axis=0)
+    # Clockwise
+    X_a = np.concatenate((X_a, np.rot90(X, axes=(2, 1))), axis=0)
+    Y_a = np.concatenate((Y_a, Y), axis=0)
+    # Flip black/white colors
+    X_a = np.concatenate((X_a, -X))
+    Y_a = np.concatenate((Y_a, Y), axis=0)
+    return X_a, Y_a
 
-    return X_f
+
+def preprocess(X, Y=None):
+    if Y is not None:
+        X, Y = _apply_augmentation(X, Y)
+    # X = _apply_normalization(X)
+    X = _apply_hog(X)
+    if Y is not None:
+        return X, Y
+    return X
 
 
 def init_data():
-    X_init, y = load_data()
-    X = feature_scaling(X_init, y)
+    X, Y = load_data()
+    X, Y = preprocess(X, Y)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=None)
-    print("data split...")
-    return X_train, X_test, y_train, y_test
-
-
-if __name__ == "__main__":
-    init_data()
-    # X = load_data_detector()
-    # print(X[0].shape)
-    # print(X[1].shape)
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        X, Y, test_size=0.2, random_state=None
+    )
+    print("Split data successfully...")
+    return X_train, X_test, Y_train, Y_test
